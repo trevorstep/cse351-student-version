@@ -42,15 +42,30 @@ from cse351 import *
 # global
 call_count = 0
 
+def worker(url):
+    item  = get_data_from_server(url)
+    print(f'  - {item["name"]}')
+
 def get_urls(film6, kind):
     global call_count
 
     urls = film6[kind]
     print(kind)
+    
+    threads = []
+    
     for url in urls:
         call_count += 1
-        item = get_data_from_server(url)
-        print(f'  - {item["name"]}')
+        t = threading.Thread(target=worker, args=(url,))
+        threads.append(t)
+        
+        for t in threads:
+            t.start()
+    
+        for t in threads:
+            t.join()
+        # item = get_data_from_server(url)
+        # print(f'  - {item["name"]}')
 
 def main():
     global call_count
@@ -61,13 +76,25 @@ def main():
     film6 = get_data_from_server(f'{TOP_API_URL}/films/6')
     call_count += 1
     print_dict(film6)
-
-    # Retrieve people
-    get_urls(film6, 'characters')
-    get_urls(film6, 'planets')
-    get_urls(film6, 'starships')
-    get_urls(film6, 'vehicles')
-    get_urls(film6, 'species')
+    
+    # get_urls(film6, 'characters')
+    # get_urls(film6, 'planets')
+    # get_urls(film6, 'starships')
+    # get_urls(film6, 'vehicles')
+    # get_urls(film6, 'species')
+    
+    threads = []
+    threads.append(threading.Thread(target=get_urls, args=(film6, 'characters')))
+    threads.append(threading.Thread(target=get_urls, args=(film6, 'planets')))
+    threads.append(threading.Thread(target=get_urls, args=(film6, 'starships')))
+    threads.append(threading.Thread(target=get_urls, args=(film6, 'vehicles')))
+    threads.append(threading.Thread(target=get_urls, args=(film6, 'speicies')))
+    
+    for t in threads:
+        t.start()
+    
+    for t in threads:
+        t.join()
 
     log.stop_timer('Total Time To complete')
     log.write(f'There were {call_count} calls to the server')

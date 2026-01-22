@@ -31,7 +31,12 @@ def main():
 
     bank = Bank()
 
-    # TODO - Add a ATM_Reader for each data file
+    readers =[ATM_Reader(filename, bank) for filename in data_files]
+    for reader in readers:
+        reader.start()
+    for reader in readers:
+        reader.join()
+        
 
     test_balances(bank)
 
@@ -39,21 +44,70 @@ def main():
 
 
 # ===========================================================================
-class ATM_Reader():
-    # TODO - implement this class here
-    ...
+class ATM_Reader(threading.Thread):
+    def __init__(self, filename: str, bank):
+        threading.Thread.__init__(self)
+        self.filename = filename
+        self.bank = bank
+        
+    def run(self):
+        with open(self.filename, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if not line  or line.startswith('#'): 
+                    continue
+                parts = line.split(',')
+                account = int(parts[0])
+                
+                trans_type = parts[1]
+                amount = Money(parts[2])
+                if trans_type == 'd':
+                    self.bank.deposit(account, amount)
+                elif trans_type == 'w':
+                    self.bank.withdraw(account, amount)
+            
+                
+
 
 
 # ===========================================================================
 class Account():
-    # TODO - implement this class here
-    ...
+    
+    def __init__(self, ID):
+        self.ID = ID
+        self.balance = Money('0.00') 
+  
+    def deposit(self, amount: Money):
+        self.balance.add(amount) 
+    
+    def withdraw(self, amount: Money):
+        self.balance.sub(amount)
+    
+    def get_balance(self) -> Money:
+        return self.balance 
 
 
 # ===========================================================================
 class Bank():
-    # TODO - implement this class here
-    ...
+    def __init__ (self):
+        self.accounts = {}
+        
+    def deposit(self, account, amount: Money):
+        if account not in self.accounts:
+            self.accounts[account] = Account(account)
+            
+        self.accounts[account].deposit(amount)
+
+    def withdraw(self, account, amount: Money):
+        if account not in self.accounts:
+            self.accounts[account] = Account(account)
+        self.accounts[account].withdraw(amount)
+        
+    def get_balance(self, account) -> Money:
+        if account not in self.accounts:
+            self.accounts[account] = Account(account)
+        return self.accounts[account].get_balance()
+
 
 
 # ---------------------------------------------------------------------------
