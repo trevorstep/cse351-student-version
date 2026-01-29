@@ -57,14 +57,19 @@ class Queue351():
 
 # ---------------------------------------------------------------------------
 def producer():
+    produceQue = Queue351.__init__()
     for i in range(PRIME_COUNT):
         number = random.randint(1, 1_000_000_000_000)
+        Queue351.put(number)
+        
         # TODO - place on queue for workers
-
     # TODO - select one producer to send the "All Done" message
 
 # ---------------------------------------------------------------------------
 def consumer():
+    
+    
+    is_prime(number)    
     # TODO - get values from the queue and check if they are prime
     # TODO - if prime, write to the file
     # TODO - if "All Done" message, exit the loop
@@ -74,16 +79,23 @@ def consumer():
 def main():
 
     random.seed(102030)
+    
+    with open(FILENAME, 'w') as f:
+        ...  
 
     que = Queue351()
 
-    # TODO - create semaphores for the queue (see Queue351 class)
+    createNumbers = threading.Semaphore(10)
+    isPrime = threading.Semaphore(3)
 
-    # TODO - create barrier
+    barrier = threading.Barrier(5)
 
-    # TODO - create producers threads (see PRODUCERS value)
+    pThr = threading.Thread(target="producer", args=(", "))
 
-    # TODO - create consumers threads (see CONSUMERS value)
+    
+    csmrThr = threading.Thread(target=("consumer"), args=(", "))
+
+
 
     if os.path.exists(FILENAME):
         with open(FILENAME, 'r') as f:
